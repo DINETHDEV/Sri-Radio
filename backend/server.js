@@ -11,9 +11,18 @@ const mongoose = require('mongoose');
 const app = express();
 
 // Database Connection
-mongoose.connect(process.env.MONGO_URI, { family: 4 })
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('📦 Connected to MongoDB Atlas'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
+
+// Health check for Vercel debugging
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    env: process.env.MONGO_URI ? 'set' : 'missing'
+  });
+});
 
 // Middleware
 app.use(cors());
