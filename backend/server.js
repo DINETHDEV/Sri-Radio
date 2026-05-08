@@ -83,3 +83,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`✅ SriRadio backend running on port ${PORT}`);
 });
+
+module.exports = app;
