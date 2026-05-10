@@ -10,10 +10,13 @@ const mongoose = require('mongoose');
 
 const app = express();
 
-// Database Connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('📦 Connected to MongoDB Atlas'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+if (process.env.MONGO_URI) {
+  mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('📦 Connected to MongoDB Atlas'))
+    .catch(err => console.error('❌ MongoDB connection error:', err));
+} else {
+  console.error('❌ MONGO_URI is missing in Environment Variables!');
+}
 
 // Health check for Vercel debugging
 app.get('/api/health', (req, res) => {
