@@ -10,13 +10,59 @@ const mongoose = require('mongoose');
 
 const app = express();
 
+// 🚀 Fix for Sri Lanka ISP DNS SRV block 🚀
+require('dns').setServers(['8.8.8.8', '8.8.4.4']);
+
+const Channel = require('./models/Channel');
+const User = require('./models/User');
+const bcrypt = require('bcryptjs');
+
+// Auto-seed function - runs once after MongoDB connects
+const seedDatabase = async () => {
+  try {
+    const channelCount = await Channel.countDocuments();
+    if (channelCount === 0) {
+      console.log('🌱 No channels found. Seeding from db.json...');
+      const { readDB } = require('./dbHelper');
+      const db = readDB();
+
+      // Seed channels
+      if (db.channels && db.channels.length > 0) {
+        await Channel.insertMany(db.channels.map(ch => ({
+          name: ch.name,
+          streamUrl: ch.streamUrl,
+          category: ch.category,
+          logoUrl: ch.logoUrl || '',
+          isActive: ch.isActive !== false,
+        })));
+        console.log(`✅ Seeded ${db.channels.length} channels to MongoDB!`);
+      }
+
+      // Seed admin user
+      const userCount = await User.countDocuments();
+      if (userCount === 0) {
+        await User.create({ username: 'admin', password: 'password123' });
+        console.log('✅ Seeded admin user (admin / password123)');
+      }
+    } else {
+      console.log(`✅ Database ready — ${channelCount} channels loaded.`);
+    }
+  } catch (err) {
+    console.error('❌ Seed error:', err.message);
+  }
+};
+
 if (process.env.MONGO_URI) {
   mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('📦 Connected to MongoDB Atlas'))
+    .then(async () => {
+      console.log('📦 Connected to MongoDB Atlas');
+      await seedDatabase();
+    })
     .catch(err => console.error('❌ MongoDB connection error:', err));
 } else {
   console.error('❌ MONGO_URI is missing in Environment Variables!');
 }
+
 
 // Health check for Vercel debugging
 app.get('/api/health', (req, res) => {

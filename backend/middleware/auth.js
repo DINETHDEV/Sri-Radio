@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
-const { readDB } = require('../dbHelper');
+const User = require('../models/User');
 
-const protect = (req, res, next) => {
+const protect = async (req, res, next) => {
   let token;
 
   if (
@@ -15,19 +15,18 @@ const protect = (req, res, next) => {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret123');
 
-      // Get user from JSON DB
-      const db = readDB();
-      const user = db.users.find(u => u._id === decoded.id);
+      // Get user from MongoDB
+      const user = await User.findById(decoded.id).select('-password');
 
       if (user) {
-        req.user = { _id: user._id, username: user.username };
+        req.user = user;
         next();
       } else {
         res.status(401).json({ message: 'Not authorized, user not found' });
       }
     } catch (error) {
       console.error(error);
-      res.status(401).json({ message: 'Not authorized' });
+      res.status(401).json({ message: 'Not authorized, token failed' });
     }
   } else {
     res.status(401).json({ message: 'Not authorized, no token' });
