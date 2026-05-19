@@ -79,11 +79,16 @@ const Dashboard = () => {
 
   const filteredChannels = channels.filter(c => {
     const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || c.category === selectedCategory;
+    const isTV = c.category?.toLowerCase() === 'tv' || c.streamUrl?.includes('.m3u8') || c.streamUrl?.includes('chunklist');
+    
+    let matchesCategory = true;
+    if (selectedCategory === 'FM') matchesCategory = !isTV;
+    else if (selectedCategory === 'TV') matchesCategory = isTV;
+    
     return matchesSearch && matchesCategory;
   });
 
-  const categories = ['All', 'FM', 'Radio', 'News', 'Music', 'TV'];
+  const categories = ['All', 'FM', 'TV'];
 
   return (
     <div className="min-h-screen bg-dark-900 text-gray-200">
@@ -156,12 +161,35 @@ const Dashboard = () => {
 
         {/* Stats Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4 flex flex-col justify-center">
-            <span className="text-gray-400 text-sm font-medium">Total Channels</span>
+          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4 flex flex-col justify-center shadow-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-gray-400 text-sm font-medium">Total Channels</span>
+            </div>
             <span className="text-3xl font-bold text-white mt-1">{channels.length}</span>
           </div>
-          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4 flex flex-col justify-center">
-            <span className="text-gray-400 text-sm font-medium">Active Channels</span>
+          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4 flex flex-col justify-center shadow-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+              <span className="text-gray-400 text-sm font-medium">TV Channels</span>
+            </div>
+            <span className="text-3xl font-bold text-blue-400 mt-1">
+              {channels.filter(c => c.category?.toLowerCase() === 'tv' || c.streamUrl?.includes('.m3u8') || c.streamUrl?.includes('chunklist')).length}
+            </span>
+          </div>
+          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4 flex flex-col justify-center shadow-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full bg-purple-400"></span>
+              <span className="text-gray-400 text-sm font-medium">FM Radio</span>
+            </div>
+            <span className="text-3xl font-bold text-purple-400 mt-1">
+              {channels.filter(c => !(c.category?.toLowerCase() === 'tv' || c.streamUrl?.includes('.m3u8') || c.streamUrl?.includes('chunklist'))).length}
+            </span>
+          </div>
+          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4 flex flex-col justify-center shadow-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full bg-green-400"></span>
+              <span className="text-gray-400 text-sm font-medium">Active</span>
+            </div>
             <span className="text-3xl font-bold text-green-400 mt-1">{channels.filter(c => c.isActive).length}</span>
           </div>
         </div>
@@ -206,8 +234,12 @@ const Dashboard = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2.5 py-1 text-xs font-medium bg-dark-700 text-gray-300 rounded-md border border-dark-600">
-                          {channel.category}
+                        <span className={`px-2.5 py-1 text-xs font-medium rounded-md border ${
+                          (channel.category?.toLowerCase() === 'tv' || channel.streamUrl?.includes('.m3u8')) 
+                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' 
+                            : 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                        }`}>
+                          {(channel.category?.toLowerCase() === 'tv' || channel.streamUrl?.includes('.m3u8')) ? 'TV' : 'FM'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

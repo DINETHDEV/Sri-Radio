@@ -73,7 +73,7 @@ export default function Home() {
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState(null);
   const [search, setSearch]         = useState('');
-  const [category, setCategory]     = useState('All');
+  const [activeTab, setActiveTab]   = useState('radio');
   const [favorites, setFavorites]   = useState(() => {
     try { return JSON.parse(localStorage.getItem('sr_favs') || '[]'); } catch { return []; }
   });
@@ -110,11 +110,15 @@ export default function Home() {
   /* filtered list */
   const filtered = channels.filter(c => {
     const s = c.name.toLowerCase().includes(search.toLowerCase());
-    const cat = category === 'All' || c.category === category || (category === 'Favorites' && favorites.includes(c._id));
-    return s && cat;
+    const isTV = c.category?.toLowerCase() === 'tv' || c.streamUrl?.includes('.m3u8') || c.streamUrl?.includes('chunklist');
+    
+    let matchesTab = false;
+    if (activeTab === 'radio') matchesTab = !isTV;
+    else if (activeTab === 'tv') matchesTab = isTV;
+    else if (activeTab === 'fav') matchesTab = favorites.includes(c._id);
+    
+    return s && matchesTab;
   });
-
-  const cats = ['All', 'Favorites', ...new Set(channels.map(c => c.category))];
 
   /* play */
   const play = useCallback((ch) => {
@@ -307,21 +311,31 @@ export default function Home() {
 
       {/* ═══ CHANNEL GRID ══════════════════════════════════ */}
       <main style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px 40px', position: 'relative', zIndex: 1 }}>
-        {/* Category Filter Tabs */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 28, overflowX: 'auto', paddingBottom: 4 }}>
-          {cats.map(cat => {
-            const active = category === cat;
+        {/* Advanced Media Tabs */}
+        <div style={{
+          display: 'flex', gap: 12, marginBottom: 32, overflowX: 'auto', paddingBottom: 8,
+          borderBottom: '1px solid rgba(255,255,255,0.05)'
+        }}>
+          {[
+            { id: 'radio', label: '🎧 Live FM Radio' },
+            { id: 'tv', label: '📺 Live TV' },
+            { id: 'fav', label: '❤️ Favorites' }
+          ].map(tab => {
+            const active = activeTab === tab.id;
             return (
-              <button key={cat} onClick={() => setCategory(cat)} style={{
-                flexShrink: 0, padding: '8px 20px', borderRadius: 99,
-                fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                border: active ? 'none' : '1px solid rgba(255,255,255,0.08)',
-                background: active ? 'linear-gradient(135deg,#3b82f6,#8b5cf6)' : 'rgba(255,255,255,0.05)',
-                color: active ? '#fff' : '#9ca3af',
-                boxShadow: active ? '0 0 20px rgba(59,130,246,0.4)' : 'none',
-                transition: 'all 0.2s',
-              }}>
-                {cat === 'Favorites' ? '❤ Favorites' : cat}
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
+                flexShrink: 0, padding: '10px 24px', borderRadius: 12,
+                fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                border: active ? '1px solid rgba(59,130,246,0.4)' : '1px solid transparent',
+                background: active ? 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15))' : 'transparent',
+                color: active ? '#fff' : '#6b7280',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: active ? '0 4px 20px rgba(59,130,246,0.1)' : 'none',
+              }}
+              onMouseEnter={e => { if(!active) e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={e => { if(!active) e.currentTarget.style.color = '#6b7280'; }}
+              >
+                {tab.label}
               </button>
             );
           })}
@@ -350,65 +364,92 @@ export default function Home() {
             <p style={{ fontSize: 14 }}>Try a different search or category</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))', gap: 16 }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: activeTab === 'tv' ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(160px, 1fr))', 
+            gap: activeTab === 'tv' ? 24 : 16 
+          }}>
             {filtered.map((ch, idx) => {
               const isActive = current?._id === ch._id;
               const isThisPlaying = isActive && playing;
               const [c1, c2] = getColor(ch.name);
               const isFav = favorites.includes(ch._id);
+              const isTV = ch.category?.toLowerCase() === 'tv' || ch.streamUrl?.includes('.m3u8') || ch.streamUrl?.includes('chunklist');
 
               return (
                 <div key={ch._id} onClick={() => play(ch)}
                   className="card-hover"
                   style={{
-                    position: 'relative', borderRadius: 20, overflow: 'hidden', cursor: 'pointer',
-                    background: isActive ? `linear-gradient(135deg,${c1}22,${c2}22)` : 'rgba(255,255,255,0.04)',
-                    border: `1.5px solid ${isActive ? c1 + '60' : 'rgba(255,255,255,0.07)'}`,
+                    position: 'relative', borderRadius: isTV ? 16 : 20, overflow: 'hidden', cursor: 'pointer',
+                    background: isActive ? `linear-gradient(135deg,${c1}22,${c2}22)` : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${isActive ? c1 + '60' : 'rgba(255,255,255,0.07)'}`,
                     boxShadow: isThisPlaying ? `0 0 40px ${c1}35` : 'none',
                     animationDelay: `${idx * 40}ms`,
+                    display: 'flex', flexDirection: isTV ? 'column' : 'column',
                   }}
                 >
                   {/* Fav btn */}
                   <button onClick={e => toggleFav(ch._id, e)} style={{
-                    position: 'absolute', top: 12, right: 12, zIndex: 2,
-                    background: 'rgba(0,0,0,0.4)', border: 'none', borderRadius: '50%',
-                    width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer',
+                    position: 'absolute', top: 12, right: 12, zIndex: 10,
+                    background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50%',
+                    width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', backdropFilter: 'blur(4px)'
                   }}>
                     {isFav
-                      ? <FaHeart style={{ color: '#f43f5e', fontSize: 12 }} />
-                      : <FaRegHeart style={{ color: '#9ca3af', fontSize: 12 }} />
+                      ? <FaHeart style={{ color: '#f43f5e', fontSize: 13 }} />
+                      : <FaRegHeart style={{ color: '#9ca3af', fontSize: 13 }} />
                     }
                   </button>
 
-                  {/* Card body */}
-                  <div style={{ padding: '24px 16px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                    <div style={{ position: 'relative', marginBottom: 16 }}>
-                      {isThisPlaying && (
-                        <div style={{
-                          position: 'absolute', inset: -6, borderRadius: '50%',
-                          border: `2px solid ${c1}`, animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite', opacity: 0.4
-                        }} />
+                  {isTV ? (
+                    /* TV Card Layout (16:9 Banner) */
+                    <>
+                      <div style={{ width: '100%', aspectRatio: '16/9', background: `linear-gradient(135deg,${c1}44,${c2}44)`, position: 'relative' }}>
+                         {ch.logoUrl ? (
+                           <img src={ch.logoUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={ch.name} />
+                         ) : (
+                           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, fontWeight: 900, color: '#fff', opacity: 0.5 }}>
+                             {getInitials(ch.name)}
+                           </div>
+                         )}
+                         {/* TV Overlay Badge */}
+                         <div style={{ position: 'absolute', bottom: 12, left: 12, background: 'rgba(0,0,0,0.7)', padding: '4px 8px', borderRadius: 6, fontSize: 10, fontWeight: 800, color: '#fff', letterSpacing: 1, backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.1)' }}>TV</div>
+                      </div>
+                      <div style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                         <div style={{ fontWeight: 800, fontSize: 15, color: '#fff' }}>{ch.name}</div>
+                         {isThisPlaying && <WaveBars color={c1} />}
+                      </div>
+                    </>
+                  ) : (
+                    /* Radio Card Layout (Circle Logo) */
+                    <div style={{ padding: '24px 16px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                      <div style={{ position: 'relative', marginBottom: 16 }}>
+                        {isThisPlaying && (
+                          <div style={{
+                            position: 'absolute', inset: -6, borderRadius: '50%',
+                            border: `2px solid ${c1}`, animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite', opacity: 0.4
+                          }} />
+                        )}
+                        <Logo channel={ch} size={72} />
+                      </div>
+
+                      <div style={{ fontWeight: 800, fontSize: 14, color: '#fff', marginBottom: 8, lineHeight: 1.3 }}>
+                        {ch.name}
+                      </div>
+
+                      {isThisPlaying ? (
+                        <WaveBars color={c1} />
+                      ) : (
+                        <span style={{
+                          fontSize: 11, fontWeight: 600, color: '#6b7280',
+                          background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                          padding: '4px 12px', borderRadius: 99,
+                        }}>
+                          FM Radio
+                        </span>
                       )}
-                      <Logo channel={ch} size={72} />
                     </div>
-
-                    <div style={{ fontWeight: 800, fontSize: 14, color: '#fff', marginBottom: 8, lineHeight: 1.3 }}>
-                      {ch.name}
-                    </div>
-
-                    {isThisPlaying ? (
-                      <WaveBars color={c1} />
-                    ) : (
-                      <span style={{
-                        fontSize: 11, fontWeight: 600, color: '#6b7280',
-                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
-                        padding: '4px 12px', borderRadius: 99,
-                      }}>
-                        {ch.category}
-                      </span>
-                    )}
-                  </div>
+                  )}
 
                   {/* Hover play overlay */}
                   {!isActive && (

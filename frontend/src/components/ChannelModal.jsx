@@ -85,17 +85,15 @@ const ChannelModal = ({ isOpen, onClose, channel, onSave }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">Category</label>
+            <label className="block text-sm font-medium text-gray-400 mb-1">Category (Type)</label>
             <select
               name="category"
               value={formData.category}
               onChange={handleChange}
               className="w-full bg-dark-900 border border-dark-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary-500 transition-colors"
             >
-              <option value="FM">FM</option>
-              <option value="Radio">Radio</option>
-              <option value="News">News</option>
-              <option value="Music">Music</option>
+              <option value="FM">FM Radio</option>
+              <option value="TV">Live TV</option>
             </select>
           </div>
 
