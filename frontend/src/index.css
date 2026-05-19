@@ -63,6 +63,17 @@
   50% { background-position: 100% 50%; }
 }
 
+@keyframes mesh-gradient-bg {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+  50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.8); }
+}
+
 .animate-float { animation: float 3s ease-in-out infinite; }
 .animate-wave { animation: wave 1s ease-in-out infinite; }
 .animate-fadeInUp { animation: fadeInUp 0.5s ease-out forwards; }
@@ -83,10 +94,11 @@
 }
 
 .card-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .card-hover:hover {
-  transform: translateY(-6px) scale(1.02);
+  transform: translateY(-8px) scale(1.03) perspective(1000px) rotateX(2deg) rotateY(2deg);
+  z-index: 10;
 }
 
 .skeleton {

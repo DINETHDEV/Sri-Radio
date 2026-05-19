@@ -285,60 +285,82 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ═══ HERO ══════════════════════════════════════════ */}
-      <section style={{ textAlign: 'center', padding: '60px 24px 48px', position: 'relative', zIndex: 1 }}>
+      {/* ═══ ULTRA PREMIUM HERO ══════════════════════════════════════════ */}
+      <section style={{ 
+        textAlign: 'center', padding: '80px 24px 60px', position: 'relative', zIndex: 1,
+        overflow: 'hidden', borderBottom: '1px solid rgba(255,255,255,0.05)'
+      }}>
+        {/* Animated Mesh Background */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: -1, opacity: 0.15,
+          background: 'radial-gradient(circle at 0% 0%, #3b82f6 0%, transparent 50%), radial-gradient(circle at 100% 100%, #a855f7 0%, transparent 50%), radial-gradient(circle at 50% 50%, #4f46e5 0%, transparent 50%)',
+          backgroundSize: '200% 200%',
+          animation: 'mesh-gradient-bg 15s ease infinite',
+        }} />
+        
+        {/* Glowing Orbs */}
+        <div style={{ position: 'absolute', top: -50, left: '20%', width: 300, height: 300, background: '#3b82f6', filter: 'blur(100px)', opacity: 0.2, borderRadius: '50%', zIndex: -1 }} />
+        <div style={{ position: 'absolute', bottom: -50, right: '20%', width: 300, height: 300, background: '#a855f7', filter: 'blur(100px)', opacity: 0.2, borderRadius: '50%', zIndex: -1 }} />
+
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)',
-          color: '#60a5fa', fontSize: 13, fontWeight: 600,
-          padding: '8px 20px', borderRadius: 99, marginBottom: 24,
+          background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
+          color: '#e5e7eb', fontSize: 13, fontWeight: 700,
+          padding: '8px 20px', borderRadius: 99, marginBottom: 32,
+          backdropFilter: 'blur(10px)', boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
         }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80', display: 'inline-block', animation: 'pulse 2s infinite' }} />
-          {channels.length} Channels Live Now
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80', display: 'inline-block', animation: 'pulse 2s infinite', boxShadow: '0 0 10px #4ade80' }} />
+          {channels.filter(c => c.isActive).length} Channels Live Now
         </div>
 
-        <h2 style={{ fontSize: 'clamp(36px, 6vw, 64px)', fontWeight: 900, lineHeight: 1.1, marginBottom: 16, margin: '0 auto 16px' }}>
-          <span style={{ background: 'linear-gradient(135deg,#fff 0%,#60a5fa 50%,#a78bfa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            Listen to
+        <h2 style={{ fontSize: 'clamp(42px, 8vw, 76px)', fontWeight: 900, lineHeight: 1.05, marginBottom: 20, margin: '0 auto 20px', letterSpacing: '-1.5px' }}>
+          <span style={{ color: '#fff', textShadow: '0 0 40px rgba(255,255,255,0.2)' }}>
+            SriRadio Hub
           </span>
           <br />
-          <span style={{ color: '#fff' }}>Sri Lankan Radio</span>
+          <span style={{ background: 'linear-gradient(135deg, #60a5fa 0%, #c084fc 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 0 20px rgba(96,165,250,0.3))' }}>
+            Live TV & FM
+          </span>
         </h2>
-        <p style={{ color: '#6b7280', fontSize: 17, maxWidth: 520, margin: '0 auto' }}>
-          Stream your favorite FM stations — crystal clear, anywhere, for free.
+        <p style={{ color: '#9ca3af', fontSize: 18, maxWidth: 600, margin: '0 auto', lineHeight: 1.6, fontWeight: 500 }}>
+          Experience the next generation of streaming. Crystal clear FM radio and high-definition live TV, all in one premium hub.
         </p>
       </section>
 
       {/* ═══ CHANNEL GRID ══════════════════════════════════ */}
       <main style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px 40px', position: 'relative', zIndex: 1 }}>
-        {/* Advanced Media Tabs */}
-        <div style={{
-          display: 'flex', gap: 12, marginBottom: 32, overflowX: 'auto', paddingBottom: 8,
-          borderBottom: '1px solid rgba(255,255,255,0.05)'
-        }}>
-          {[
-            { id: 'radio', label: '🎧 Live FM Radio' },
-            { id: 'tv', label: '📺 Live TV' },
-            { id: 'fav', label: '❤️ Favorites' }
-          ].map(tab => {
-            const active = activeTab === tab.id;
-            return (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-                flexShrink: 0, padding: '10px 24px', borderRadius: 12,
-                fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                border: active ? '1px solid rgba(59,130,246,0.4)' : '1px solid transparent',
-                background: active ? 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15))' : 'transparent',
-                color: active ? '#fff' : '#6b7280',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: active ? '0 4px 20px rgba(59,130,246,0.1)' : 'none',
-              }}
-              onMouseEnter={e => { if(!active) e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { if(!active) e.currentTarget.style.color = '#6b7280'; }}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+        {/* Ultra Premium Segmented Tabs */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 40, marginTop: -24 }}>
+          <div style={{
+            display: 'inline-flex', background: 'rgba(15,15,20,0.8)', backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: 6,
+            boxShadow: '0 20px 40px rgba(0,0,0,0.4)', position: 'relative', zIndex: 10
+          }}>
+            {[
+              { id: 'radio', label: '🎧 Live FM Radio' },
+              { id: 'tv', label: '📺 Live TV' },
+              { id: 'fav', label: '❤️ Favorites' }
+            ].map(tab => {
+              const active = activeTab === tab.id;
+              return (
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
+                  padding: '12px 32px', borderRadius: 16,
+                  fontSize: 15, fontWeight: 800, cursor: 'pointer',
+                  border: 'none',
+                  background: active ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)' : 'transparent',
+                  color: active ? '#fff' : '#9ca3af',
+                  transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                  boxShadow: active ? '0 8px 20px rgba(59,130,246,0.3)' : 'none',
+                  letterSpacing: '0.5px'
+                }}
+                onMouseEnter={e => { if(!active) e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { if(!active) e.currentTarget.style.color = '#9ca3af'; }}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
         {loading ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 16 }}>
@@ -689,28 +711,32 @@ export default function Home() {
         );
       })()}
 
-      {/* ═══ BOTTOM PLAYER ═════════════════════════════════ */}
+      {/* ═══ ULTRA PREMIUM BOTTOM PLAYER ════════════════════════════════════ */}
       {current && (() => {
         const [c1, c2] = getColor(current.name);
         return (
           <div style={{
-            position: 'fixed', bottom: 0, left: 0, width: '100%', zIndex: 100,
-            background: 'rgba(13,13,20,0.95)', backdropFilter: 'blur(24px)',
-            borderTop: '1px solid rgba(255,255,255,0.07)',
-            boxShadow: '0 -20px 60px rgba(0,0,0,0.7)',
+            position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', 
+            width: 'calc(100% - 48px)', maxWidth: 1100, zIndex: 100,
+            background: 'rgba(15, 15, 20, 0.75)', backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)',
+            border: '1px solid rgba(255,255,255,0.1)', borderRadius: 28,
+            boxShadow: `0 30px 60px rgba(0,0,0,0.6), 0 0 40px ${c1}15, inset 0 1px 0 rgba(255,255,255,0.15)`,
+            padding: '4px',
+            animation: 'fadeInUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
           }}>
-            {/* Progress bar */}
-            <div style={{ height: 3, background: 'rgba(255,255,255,0.05)' }}>
+            {/* Progress bar inside floating container */}
+            <div style={{ position: 'absolute', top: -1, left: 24, right: 24, height: 2, background: 'transparent', borderRadius: 99, overflow: 'hidden' }}>
               <div style={{
                 height: '100%', width: `${livePct}%`,
                 background: `linear-gradient(90deg,${c1},${c2})`,
                 transition: 'width 1s linear', borderRadius: 99,
+                boxShadow: `0 0 10px ${c1}`
               }} />
             </div>
 
-            <div style={{ maxWidth: 1100, margin: '0 auto', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 20 }}>
+            <div style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: 24 }}>
               {/* Info */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1, minWidth: 0 }}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   <Logo channel={current} size={48} />
                   {playing && (
