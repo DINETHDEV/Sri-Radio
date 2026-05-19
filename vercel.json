@@ -1,5 +1,9 @@
 {
   "version": 2,
+  "env": {
+    "MONGO_URI": "mongodb+srv://henal67004_db_user:h5q4PQ0o1RdH1kZD@sriredio.rjosm3q.mongodb.net/sriradio?retryWrites=true&w=majority&appName=sriredio",
+    "JWT_SECRET": "supersecretjwtkey_sriradio_admin_2024"
+  },
   "builds": [
     {
       "src": "backend/server.js",
