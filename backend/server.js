@@ -10,8 +10,10 @@ const mongoose = require('mongoose');
 
 const app = express();
 
-// 🚀 Fix for Sri Lanka ISP DNS SRV block 🚀
-require('dns').setServers(['8.8.8.8', '8.8.4.4']);
+// 🚀 Fix for Sri Lanka ISP DNS SRV block (Only local) 🚀
+if (!process.env.VERCEL) {
+  require('dns').setServers(['8.8.8.8', '8.8.4.4']);
+}
 
 const Channel = require('./models/Channel');
 const User = require('./models/User');
@@ -53,7 +55,7 @@ const seedDatabase = async () => {
 };
 
 if (process.env.MONGO_URI) {
-  mongoose.connect(process.env.MONGO_URI)
+  mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 })
     .then(async () => {
       console.log('📦 Connected to MongoDB Atlas');
       await seedDatabase();
