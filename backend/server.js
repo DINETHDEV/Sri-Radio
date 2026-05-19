@@ -54,16 +54,31 @@ const seedDatabase = async () => {
   }
 };
 
-if (process.env.MONGO_URI) {
-  mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 })
-    .then(async () => {
-      console.log('📦 Connected to MongoDB Atlas');
-      await seedDatabase();
-    })
-    .catch(err => console.error('❌ MongoDB connection error:', err));
-} else {
-  console.error('❌ MONGO_URI is missing in Environment Variables!');
-}
+let isDbConnected = false;
+
+const connectToDatabase = async () => {
+  if (isDbConnected) return;
+  if (!process.env.MONGO_URI) {
+    throw new Error('MONGO_URI is missing');
+  }
+  await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 });
+  isDbConnected = true;
+  console.log('📦 Connected to MongoDB Atlas');
+  await seedDatabase();
+};
+
+// Middleware to ensure DB connection before handling API routes
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    try {
+      await connectToDatabase();
+    } catch (err) {
+      console.error('❌ DB Connect Error:', err.message);
+      return res.status(500).json({ message: 'Database connection failed', error: err.message });
+    }
+  }
+  next();
+});
 
 
 // Health check for Vercel debugging
